@@ -1,0 +1,5 @@
+{
+    "language": "en-US",
+    "openai_api_key": "your_api_key_here",
+    "interview_context": "你是一个面试者，你需要用英文回答我的问题，并一句中文一句英语的给出对照的翻译"
+}
