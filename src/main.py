@@ -13,6 +13,7 @@ import subprocess
 import sys
 import shutil
 from src.config.settings import OPENAI_API_KEY  # 从配置文件导入API密钥
+from src.postprocess.processor import TextProcessor
 
 class InterviewAssistant:
     def __init__(self, config_path: str = "config.json"):
@@ -60,6 +61,7 @@ class InterviewAssistant:
         self.is_running = True  # 程序运行状态
         self.stream = None  # 音频流对象
         self.audio_data = []  # 存储录音数据
+        self.text_processor = TextProcessor(industry="web3")
 
     def _load_config(self, config_path: str):
         """加载配置文件"""
@@ -110,7 +112,7 @@ class InterviewAssistant:
             print(f"\n开始录音时出错: {str(e)}")  # 如果出错，打印错误信息
             self.is_recording = False
 
-    def stop_recording(self):
+    async def stop_recording(self):
         """停止录音并处理音频"""
         if not self.is_recording:
             return
@@ -154,16 +156,20 @@ class InterviewAssistant:
                     temp_wav,
                     language='en',
                     fp16=False,
-                    # 添加一些额外的参数来提高精度
-                    condition_on_previous_text=True,
                     initial_prompt="This is an interview conversation in English."
                 )
                 print("语音识别完成")
 
                 text = result["text"].strip()
                 if text:
-                    print(f"\n识别到的文本: {text}")
-                    self._getResponse(text)
+                    print(f"\n原始识别文本: {text}")
+                    
+                    # 执行后处理
+                    processed_text = await self.text_processor.process(text)
+                    print(f"后处理文本: {processed_text}")
+                    
+                    # 获取AI回答
+                    self._getResponse(processed_text)
                 else:
                     print("\n未能识别到有效的语音内容")
 
@@ -246,7 +252,7 @@ class InterviewAssistant:
         
         # 绑定F2和F3键，用于开始和停止录音
         keyboard.on_press_key("F2", lambda e: self.start_recording())
-        keyboard.on_press_key("F3", lambda e: self.stop_recording())
+        keyboard.on_press_key("F3", lambda e: self._stop_recording_callback(e))
 
         # 主循环，保持程序运行
         while self.is_running:
@@ -258,6 +264,11 @@ class InterviewAssistant:
                 if self.is_recording:
                     print(f"\n录音错误: {str(e)}")
             await asyncio.sleep(0.01)
+
+    def _stop_recording_callback(self, e):
+        """F3按键回调"""
+        if self.is_recording:
+            asyncio.create_task(self.stop_recording())
 
 if __name__ == "__main__":
     print("AI 面试助手启动...")  # 程序启动提示
