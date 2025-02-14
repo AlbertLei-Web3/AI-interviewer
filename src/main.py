@@ -12,8 +12,19 @@ import numpy as np  # 用于处理数值计算
 import subprocess
 import sys
 import shutil
-from src.config.settings import OPENAI_API_KEY  # 从配置文件导入API密钥
-from src.postprocess.processor import TextProcessor
+import openai
+from config.config_manager import ConfigManager
+from postprocess.processor import TextProcessor
+from getMic import get_mic
+
+# 初始化配置
+config = ConfigManager()
+OPENAI_API_KEY = config.get('api.openai_api_key')
+WHISPER_MODEL_PATH = config.get('whisper.model_path')
+WHISPER_MODEL_TYPE = config.get('whisper.model_type')
+
+# 设置OpenAI API密钥
+openai.api_key = OPENAI_API_KEY
 
 class InterviewAssistant:
     def __init__(self, config_path: str = "config.json"):

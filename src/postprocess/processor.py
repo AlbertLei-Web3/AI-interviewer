@@ -4,14 +4,34 @@ from .spell_check import SpellChecker
 from .grammar_check import GrammarChecker
 from .semantic_check import SemanticChecker
 from .industry_terms import IndustryTermChecker
+from functools import lru_cache
+import hashlib
+from config.config_manager import ConfigManager
+from config.industry_terms import WEB3_TERMS
 
 class TextProcessor:
-    def __init__(self, industry="web3"):
-        self.spell_checker = SpellChecker()
-        self.grammar_checker = GrammarChecker()
-        self.semantic_checker = SemanticChecker()
-        self.industry_checker = IndustryTermChecker(industry)
-        self.total_timeout = 2.9  # 总超时时间
+    def __init__(self, industry=None):
+        self.config = ConfigManager()
+        self.industry = industry or self.config.get('industry', 'web3')
+        
+        # 使用配置的超时时间
+        self.total_timeout = self.config.get('processing.total_timeout', 2.9)
+        self.cache_size = self.config.get('processing.cache_size', 1000)
+        
+        # 初始化检查器
+        self.spell_checker = SpellChecker(
+            timeout=self.config.get('processing.timeouts.spell_check', 5)
+        )
+        self.grammar_checker = GrammarChecker(
+            timeout=self.config.get('processing.timeouts.grammar_check', 5)
+        )
+        self.semantic_checker = SemanticChecker(
+            timeout=self.config.get('processing.timeouts.semantic_check', 5)
+        )
+        self.industry_checker = IndustryTermChecker(
+            industry=self.industry,
+            timeout=self.config.get('processing.timeouts.industry_check', 5)
+        )
         
         # [性能监控] 添加性能统计变量
         self.performance_stats = {
@@ -21,8 +41,43 @@ class TextProcessor:
             "语义分析": [],
             "总处理时间": []
         }
+        
+        self.cache = {}
+    
+    def _get_cache_key(self, text: str) -> str:
+        """生成缓存键"""
+        return hashlib.md5(text.encode()).hexdigest()
+    
+    @lru_cache(maxsize=1000)  # 使用Python内置的LRU缓存
+    async def _process_with_cache(self, text: str) -> str:
+        """带缓存的处理函数"""
+        return await self._process_internal(text)
     
     async def process(self, text: str) -> str:
+        """主处理函数"""
+        if text is None or text == "":
+            return text
+            
+        cache_key = self._get_cache_key(text)
+        
+        # 检查缓存
+        if cache_key in self.cache:
+            print("使用缓存结果")
+            return self.cache[cache_key]
+            
+        # 处理文本
+        result = await self._process_with_cache(text)
+        
+        # 更新缓存
+        if len(self.cache) >= self.cache_size:
+            # 删除最早的缓存
+            oldest_key = next(iter(self.cache))
+            del self.cache[oldest_key]
+        
+        self.cache[cache_key] = result
+        return result
+    
+    async def _process_internal(self, text: str) -> str:
         """
         分组处理文本，保持必要的依赖顺序
         """

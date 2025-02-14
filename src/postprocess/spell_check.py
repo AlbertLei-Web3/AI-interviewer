@@ -2,7 +2,13 @@ from spellchecker import SpellChecker as PySpellChecker
 import asyncio
 
 class SpellChecker:
-    def __init__(self):
+    def __init__(self, timeout=0.5):
+        """
+        初始化拼写检查器
+        Args:
+            timeout (float): 检查超时时间，默认0.5秒
+        """
+        self.timeout = timeout
         self.spell = PySpellChecker()
     
     async def check(self, text: str, timeout: float = 0.5) -> str:

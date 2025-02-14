@@ -1,0 +1,33 @@
+{   "api": {
+        "openai_api_key": "${OPENAI_API_KEY}"  
+    },
+    "whisper": {
+        "model_path": "models/whisper",
+        "model_type": "${WHISPER_MODEL_TYPE}"
+    },
+    "audio": {
+        "chunk_size": "${AUDIO_CHUNK_SIZE:4096}",
+        "channels": "${AUDIO_CHANNELS:1}",
+        "rate": "${AUDIO_RATE:48000}"
+    },
+    "processing": {
+        "total_timeout": 2.9,
+        "cache_size": 1000,
+        "batch_size": 5,
+        "timeouts": {
+            "spell_check": 5,
+            "grammar_check": 5,
+            "semantic_check": 5,
+            "industry_check": 5
+        }
+    },
+    "industry": "web3",
+    "performance": {
+        "enable_cache": true,
+        "enable_batch": true,
+        "debug_mode": false
+    },
+    "interview": {
+        "context": "${INTERVIEW_CONTEXT}"
+    }
+} 

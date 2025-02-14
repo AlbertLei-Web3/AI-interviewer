@@ -2,7 +2,13 @@ import asyncio
 import spacy
 
 class SemanticChecker:
-    def __init__(self):
+    def __init__(self, timeout=0.5):
+        """
+        初始化语义检查器
+        Args:
+            timeout (float): 检查超时时间，默认0.5秒
+        """
+        self.timeout = timeout
         # 加载英语语言模型
         self.nlp = spacy.load("en_core_web_sm")
     

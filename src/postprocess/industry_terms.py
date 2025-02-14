@@ -1,9 +1,16 @@
-from src.config.industry_terms import WEB3_TERMS
+from config.industry_terms import WEB3_TERMS
 import asyncio
 from difflib import get_close_matches
 
 class IndustryTermChecker:
-    def __init__(self, industry="web3"):
+    def __init__(self, industry="web3", timeout=0.5):
+        """
+        初始化行业术语检查器
+        Args:
+            industry (str): 行业类型，默认"web3"
+            timeout (float): 检查超时时间，默认0.5秒
+        """
+        self.timeout = timeout
         self.terms = WEB3_TERMS if industry == "web3" else {}
     
     async def check(self, text: str, timeout: float = 0.5) -> str:

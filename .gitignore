@@ -50,6 +50,10 @@ htmlcov/
 coverage.xml
 *.cover
 
+# Backup files
+backup_configs/
+*.bak
+
 # Python
 __pycache__/
 *.py[cod]
