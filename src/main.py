@@ -244,7 +244,12 @@ class InterviewAssistant:
             res = conn.getresponse()  # 获取响应
             data = res.read()  # 读取响应数据
             response = json.loads(data.decode("utf-8"))  # 解析JSON数据
-
+            
+            # 添加错误处理和调试信息
+            if 'error' in response:
+                print(f"\nAPI错误: {response['error']['message']}")
+                return
+            
             message = response["choices"][0]["message"]["content"]  # 获取AI回答
 
             print("\n=== AI回答 ===")
@@ -252,7 +257,8 @@ class InterviewAssistant:
             print("============")
 
         except Exception as e:
-            print(f"\nAI响应错误: {str(e)}")  # 如果AI响应错误，打印错误信息
+            print(f"\nAI响应错误: {str(e)}")
+            print(f"响应内容: {data.decode('utf-8') if 'data' in locals() else '无响应数据'}")
 
     async def run(self):
         """主运行循环"""
@@ -279,7 +285,13 @@ class InterviewAssistant:
     def _stop_recording_callback(self, e):
         """F3按键回调"""
         if self.is_recording:
-            asyncio.create_task(self.stop_recording())
+            # 创建新的事件循环来处理异步调用
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(self.stop_recording())
+            finally:
+                loop.close()
 
 if __name__ == "__main__":
     print("AI 面试助手启动...")  # 程序启动提示
