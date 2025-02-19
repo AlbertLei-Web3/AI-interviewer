@@ -10,9 +10,10 @@ from config.config_manager import ConfigManager
 from config.industry_terms import WEB3_TERMS
 
 class TextProcessor:
-    def __init__(self, industry=None):
+    def __init__(self, industry=None, enable_postprocess=False):  # 默认关闭后处理
         self.config = ConfigManager()
         self.industry = industry or self.config.get('industry', 'web3')
+        self.enable_postprocess = enable_postprocess  # 添加后处理开关
         
         # 使用配置的超时时间
         self.total_timeout = self.config.get('processing.total_timeout', 2.9)
@@ -56,6 +57,10 @@ class TextProcessor:
     async def process(self, text: str) -> str:
         """主处理函数"""
         if text is None or text == "":
+            return text
+            
+        # 如果后处理被禁用，直接返回原文本
+        if not self.enable_postprocess:
             return text
             
         cache_key = self._get_cache_key(text)

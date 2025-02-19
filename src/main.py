@@ -35,7 +35,7 @@ class InterviewAssistant:
         
         # 加载配置文件，默认路径为"config.json"
         self.config = self._load_config(config_path)
-        
+
         # 初始化Whisper模型，使用更大的模型提高精度
         print(f"正在加载Whisper模型... (保存路径: {whisper_dir})")
         self.whisper_model = whisper.load_model("medium")  # 改用medium模型
@@ -108,13 +108,13 @@ class InterviewAssistant:
         try:
             self.start_time = time.time()  # 记录按下 F2 时的时间
             self.stream = self.p.open(
-                format=self.FORMAT,
-                channels=self.CHANNELS,
-                rate=self.RATE,
-                input=True,
+                        format=self.FORMAT,
+                        channels=self.CHANNELS,
+                        rate=self.RATE,
+                        input=True,
                 input_device_index=self.cable_index,
-                frames_per_buffer=self.CHUNK
-            )
+                        frames_per_buffer=self.CHUNK
+                    )
             self.is_recording = True
             self.audio_data = []
             print("\n开始录音...")
@@ -142,11 +142,11 @@ class InterviewAssistant:
             # 保存音频文件
             temp_wav = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"temp_recording_{int(time.time())}.wav")
             with wave.open(temp_wav, 'wb') as wf:
-                wf.setnchannels(self.CHANNELS)
-                wf.setsampwidth(self.p.get_sample_size(self.FORMAT))
-                wf.setframerate(self.RATE)
-                wf.writeframes(b''.join(self.audio_data))
-
+                            wf.setnchannels(self.CHANNELS)
+                            wf.setsampwidth(self.p.get_sample_size(self.FORMAT))
+                            wf.setframerate(self.RATE)
+                            wf.writeframes(b''.join(self.audio_data))
+                        
             # 验证文件是否创建成功
             if not os.path.exists(temp_wav):
                 raise FileNotFoundError(f"临时文件创建失败: {temp_wav}")
@@ -237,7 +237,7 @@ class InterviewAssistant:
                 }
             ]
         })
-
+        
         try:
             # 发送POST请求
             conn.request("POST", "/v1/chat/completions", payload, headers)
@@ -248,17 +248,19 @@ class InterviewAssistant:
             # 添加错误处理和调试信息
             if 'error' in response:
                 print(f"\nAPI错误: {response['error']['message']}")
-                return
+                return None
             
             message = response["choices"][0]["message"]["content"]  # 获取AI回答
 
             print("\n=== AI回答 ===")
             print(message)
             print("============")
-
+            return message
+            
         except Exception as e:
             print(f"\nAI响应错误: {str(e)}")
             print(f"响应内容: {data.decode('utf-8') if 'data' in locals() else '无响应数据'}")
+            return None
 
     async def run(self):
         """主运行循环"""
@@ -296,7 +298,7 @@ class InterviewAssistant:
 if __name__ == "__main__":
     print("AI 面试助手启动...")  # 程序启动提示
     assistant = InterviewAssistant()  # 创建助手对象
-
+    
     try:
         asyncio.run(assistant.run())  # 启动主运行循环
     except KeyboardInterrupt:
