@@ -14,17 +14,28 @@ import sys
 import shutil
 import openai
 from config.config_manager import ConfigManager
+from dotenv import load_dotenv
 from postprocess.processor import TextProcessor
 from getMic import get_mic
 
 # 初始化配置
+load_dotenv()  # 确保加载 .env 文件
 config = ConfigManager()
-OPENAI_API_KEY = config.get('api.openai_api_key')
+# OPENAI_API_KEY = 'sk-C7IhUgedVR5bHhTTCdD88aC12248469080974a86E15007Fe'  # 直接使用 .env 中的值
+
+# # 调试信息
+# print(f"Config API Key: {config.get('api.openai_api_key')}")
+# print(f"Using API Key: {OPENAI_API_KEY}")
+
+# if not OPENAI_API_KEY:
+#     print("错误: 未找到有效的 API 密钥，请检查 .env 文件")
+#     sys.exit(1)
+
 WHISPER_MODEL_PATH = config.get('whisper.model_path')
 WHISPER_MODEL_TYPE = config.get('whisper.model_type')
 
 # 设置OpenAI API密钥
-openai.api_key = OPENAI_API_KEY
+openai.api_key = 'sk-C7IhUgedVR5bHhTTCdD88aC122484690B0974a86E150D7Fe'
 
 class InterviewAssistant:
     def __init__(self, config_path: str = "config.json"):
@@ -219,7 +230,7 @@ class InterviewAssistant:
         conn = http.client.HTTPSConnection("kg-api.cloud")
         headers = {
             'Accept': 'application/json',
-            'Authorization': f'Bearer {OPENAI_API_KEY}',  # 使用环境变量中的API密钥
+            'Authorization': 'Bearer sk-C7IhUgedVR5bHhTTCdD88aC122484690B0974a86E150D7Fe',  # 直接使用API密钥
             'Content-Type': 'application/json'
         }
 
