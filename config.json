@@ -1,5 +1,5 @@
 {   "api": {
-        "openai_api_key": "${OPENAI_API_KEY}"  
+        "openai_api_key": "sk-C7IhUgedVR5bHhTTCdD88aC12248469080974a86E15007Fe"
     },
     "whisper": {
         "model_path": "models/whisper",
