@@ -230,7 +230,7 @@ class InterviewAssistant:
         conn = http.client.HTTPSConnection("kg-api.cloud")
         headers = {
             'Accept': 'application/json',
-            'Authorization': 'Bearer sk-C7IhUgedVR5bHhTTCdD88aC122484690B0974a86E150D7Fe',  # 直接使用API密钥
+            'Authorization': 'Bearer sk-C7IhUgedVR5bHhTTCdD88aC122484690B0974a86E150D7Fe',
             'Content-Type': 'application/json'
         }
 
@@ -248,7 +248,7 @@ class InterviewAssistant:
                 }
             ]
         })
-        
+
         try:
             # 发送POST请求
             conn.request("POST", "/v1/chat/completions", payload, headers)
@@ -256,7 +256,6 @@ class InterviewAssistant:
             data = res.read()  # 读取响应数据
             response = json.loads(data.decode("utf-8"))  # 解析JSON数据
             
-            # 添加错误处理和调试信息
             if 'error' in response:
                 print(f"\nAPI错误: {response['error']['message']}")
                 return None
