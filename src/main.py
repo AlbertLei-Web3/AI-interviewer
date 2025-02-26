@@ -17,6 +17,7 @@ from config.config_manager import ConfigManager
 from dotenv import load_dotenv
 from postprocess.processor import TextProcessor
 from getMic import get_mic
+from utils.performance_monitor import PerformanceMonitor
 
 # 初始化配置
 load_dotenv()  # 确保加载 .env 文件
@@ -39,6 +40,7 @@ openai.api_key = 'sk-C7IhUgedVR5bHhTTCdD88aC122484690B0974a86E150D7Fe'
 
 class InterviewAssistant:
     def __init__(self, config_path: str = "config.json"):
+        self.performance_monitor = PerformanceMonitor()
         # 设置 Whisper 模型下载路径
         whisper_dir = os.path.join("D:", "web3codework", "AI-interviwer", "models", "whisper")
         os.makedirs(whisper_dir, exist_ok=True)
@@ -140,6 +142,7 @@ class InterviewAssistant:
             return
             
         try:
+            track_start = self.performance_monitor.start_tracking()
             self.end_time = time.time()
             recording_duration = self.end_time - self.start_time
             self.is_recording = False
@@ -219,6 +222,13 @@ class InterviewAssistant:
                     print(f"保存录音文件失败: {str(e)}")
                     import traceback
                     traceback.print_exc()
+
+            # 记录性能数据
+            self.performance_monitor.record_performance(
+                track_start,
+                'audio_processing',
+                {'recording_duration': recording_duration}
+            )
 
         except Exception as e:
             print(f"\n处理录音时出错: {str(e)}")
